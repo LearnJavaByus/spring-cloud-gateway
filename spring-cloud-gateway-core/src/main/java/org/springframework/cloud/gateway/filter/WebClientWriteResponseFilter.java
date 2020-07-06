@@ -30,6 +30,9 @@ import static org.springframework.cloud.gateway.support.ServerWebExchangeUtils.C
 
 /**
  * @author Spencer Gibb
+ *
+ * Http 回写响应网关过滤器
+ *
  */
 public class WebClientWriteResponseFilter implements GlobalFilter, Ordered {
 
@@ -51,6 +54,7 @@ public class WebClientWriteResponseFilter implements GlobalFilter, Ordered {
 		// until the WebHandler is run
 		return chain.filter(exchange).doOnError(throwable -> cleanup(exchange))
 				.then(Mono.defer(() -> {
+					// 获得 Response
 					ClientResponse clientResponse = exchange
 							.getAttribute(CLIENT_RESPONSE_ATTR);
 					if (clientResponse == null) {

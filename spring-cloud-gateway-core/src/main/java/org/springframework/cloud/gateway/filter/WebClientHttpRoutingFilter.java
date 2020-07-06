@@ -43,9 +43,14 @@ import static org.springframework.cloud.gateway.support.ServerWebExchangeUtils.s
 
 /**
  * @author Spencer Gibb
+ *
+ * Http 路由网关过滤器。其根据 http:// 或 https:// 前缀( Scheme )过滤处理，
+ * 使用基于 org.springframework.cloud.gateway.filter.WebClient 实现的 HttpClient 请求后端 Http 服务。
+ *
  */
 public class WebClientHttpRoutingFilter implements GlobalFilter, Ordered {
 
+	//通过该属性，请求后端的 Http 服务。
 	private final WebClient webClient;
 
 	private final ObjectProvider<List<HttpHeadersFilter>> headersFiltersProvider;
@@ -73,13 +78,15 @@ public class WebClientHttpRoutingFilter implements GlobalFilter, Ordered {
 
 	@Override
 	public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
+		// 获得 requestUrl
 		URI requestUrl = exchange.getRequiredAttribute(GATEWAY_REQUEST_URL_ATTR);
-
+		// 判断是否能够处理
 		String scheme = requestUrl.getScheme();
 		if (isAlreadyRouted(exchange)
 				|| (!"http".equals(scheme) && !"https".equals(scheme))) {
 			return chain.filter(exchange);
 		}
+		// 设置已经路由
 		setAlreadyRouted(exchange);
 
 		ServerHttpRequest request = exchange.getRequest();
@@ -117,6 +124,7 @@ public class WebClientHttpRoutingFilter implements GlobalFilter, Ordered {
 					// Defer committing the response until all route filters have run
 					// Put client response as ServerWebExchange attribute and write
 					// response later NettyWriteResponseFilter
+					// 设置 Response 到 CLIENT_RESPONSE_ATTR
 					exchange.getAttributes().put(CLIENT_RESPONSE_ATTR, res);
 					return chain.filter(exchange);
 				});

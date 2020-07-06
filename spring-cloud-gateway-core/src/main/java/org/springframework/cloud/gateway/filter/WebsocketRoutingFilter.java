@@ -47,6 +47,10 @@ import static org.springframework.util.StringUtils.commaDelimitedListToStringArr
 
 /**
  * @author Spencer Gibb
+ *
+ * Websocket 路由网关过滤器。其根据 ws:// / wss:// 前缀( Scheme )过滤处理，
+ * 代理后端 Websocket 服务，提供给客户端连接。
+ *
  */
 public class WebsocketRoutingFilter implements GlobalFilter, Ordered {
 
@@ -89,14 +93,15 @@ public class WebsocketRoutingFilter implements GlobalFilter, Ordered {
 	@Override
 	public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
 		changeSchemeIfIsWebSocketUpgrade(exchange);
-
+		// 获得 requestUrl
 		URI requestUrl = exchange.getRequiredAttribute(GATEWAY_REQUEST_URL_ATTR);
 		String scheme = requestUrl.getScheme();
-
+		// 判断是否能够处理
 		if (isAlreadyRouted(exchange)
 				|| (!"ws".equals(scheme) && !"wss".equals(scheme))) {
 			return chain.filter(exchange);
 		}
+		// 设置已经路由
 		setAlreadyRouted(exchange);
 
 		HttpHeaders headers = exchange.getRequest().getHeaders();
@@ -108,7 +113,7 @@ public class WebsocketRoutingFilter implements GlobalFilter, Ordered {
 					header -> Arrays.stream(commaDelimitedListToStringArray(header)))
 					.map(String::trim).collect(Collectors.toList());
 		}
-
+		// 处理连接请求
 		return this.webSocketService.handleRequest(exchange, new ProxyWebSocketHandler(
 				requestUrl, this.webSocketClient, filtered, protocols));
 	}
@@ -150,6 +155,9 @@ public class WebsocketRoutingFilter implements GlobalFilter, Ordered {
 		}
 	}
 
+	/**
+	 * 代理后端 WebSocket 服务处理器
+	 */
 	private static class ProxyWebSocketHandler implements WebSocketHandler {
 
 		private final WebSocketClient client;
@@ -185,9 +193,11 @@ public class WebsocketRoutingFilter implements GlobalFilter, Ordered {
 				@Override
 				public Mono<Void> handle(WebSocketSession proxySession) {
 					// Use retain() for Reactor Netty
+					// 转发消息 客户端 =》后端服务
 					Mono<Void> proxySessionSend = proxySession
 							.send(session.receive().doOnNext(WebSocketMessage::retain));
 					// .log("proxySessionSend", Level.FINE);
+					// 转发消息 后端服务=》客户端
 					Mono<Void> serverSessionSend = session.send(
 							proxySession.receive().doOnNext(WebSocketMessage::retain));
 					// .log("sessionSend", Level.FINE);

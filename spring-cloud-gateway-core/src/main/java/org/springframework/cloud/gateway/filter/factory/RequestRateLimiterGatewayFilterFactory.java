@@ -35,6 +35,8 @@ import static org.springframework.cloud.gateway.support.ServerWebExchangeUtils.s
  * https://gist.github.com/ptarjan/e38f45f2dfe601419ca3af937fff574d#file-1-check_request_rate_limiter-rb-L11-L34.
  *
  * 基于 RedisRateLimiter 实现网关的限流功能
+ *
+ * 可以创建 RequestRateLimiterGatewayFilter   ，请求限流网关过滤器工厂类
  */
 @ConfigurationProperties("spring.cloud.gateway.filter.request-rate-limiter")
 public class RequestRateLimiterGatewayFilterFactory extends
@@ -93,6 +95,7 @@ public class RequestRateLimiterGatewayFilterFactory extends
 	@SuppressWarnings("unchecked")
 	@Override
 	public GatewayFilter apply(Config config) {
+		// 获得 KeyResolver
 		KeyResolver resolver = getOrDefault(config.keyResolver, defaultKeyResolver);
 		RateLimiter<Object> limiter = getOrDefault(config.rateLimiter,
 				defaultRateLimiter);
@@ -122,11 +125,11 @@ public class RequestRateLimiterGatewayFilterFactory extends
 							exchange.getResponse().getHeaders().add(header.getKey(),
 									header.getValue());
 						}
-
+						// 允许访问
 						if (response.isAllowed()) {
 							return chain.filter(exchange);
 						}
-
+						// 被限流，不允许访问
 						setResponseStatus(exchange, config.getStatusCode());
 						return exchange.getResponse().setComplete();
 					});
