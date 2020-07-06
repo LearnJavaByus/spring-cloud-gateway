@@ -161,6 +161,9 @@ import static org.springframework.cloud.gateway.config.HttpClientProperties.Pool
 import static org.springframework.cloud.gateway.config.HttpClientProperties.Pool.PoolType.FIXED;
 
 /**
+ * ConditionalOnProperty 条件注解
+ * 通过 spring.cloud.gateway.enabled配置网关的开启与关闭     matchIfMissing = true => 网关默认开启。
+ *
  * @author Spencer Gibb
  * @author Ziemowit Stolarczyk
  */
@@ -256,6 +259,10 @@ public class GatewayAutoConfiguration {
 				globalCorsProperties, environment);
 	}
 
+	/**
+	 * 加载配置beans ConfigurationProperty beans
+	 * @return
+	 */
 	@Bean
 	public GatewayProperties gatewayProperties() {
 		return new GatewayProperties();
@@ -291,6 +298,10 @@ public class GatewayAutoConfiguration {
 
 	// GlobalFilter beans
 
+	/**
+	 * 加载全局的拦截器
+	 * @return
+	 */
 	@Bean
 	public AdaptCachedBodyGlobalFilter adaptCachedBodyGlobalFilter() {
 		return new AdaptCachedBodyGlobalFilter();
@@ -582,6 +593,10 @@ public class GatewayAutoConfiguration {
 		return new GzipMessageBodyResolver();
 	}
 
+	/**
+	 * 底层通信netty配置
+	 * 当classpath中存在HttpClient起效
+	 */
 	@Configuration(proxyBeanMethods = false)
 	@ConditionalOnClass(HttpClient.class)
 	protected static class NettyConfiguration {

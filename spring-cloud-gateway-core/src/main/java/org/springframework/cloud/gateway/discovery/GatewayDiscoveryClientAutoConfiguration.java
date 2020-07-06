@@ -44,6 +44,8 @@ import static org.springframework.cloud.gateway.support.NameUtils.normalizeRoute
 
 /**
  * @author Spencer Gibb
+ *
+ * 作用是初始化配置路由中的注册发现服务信息
  */
 @Configuration(proxyBeanMethods = false)
 @ConditionalOnProperty(name = "spring.cloud.gateway.enabled", matchIfMissing = true)
@@ -112,6 +114,14 @@ public class GatewayDiscoveryClientAutoConfiguration {
 			havingValue = "false")
 	public static class BlockingDiscoveryClientRouteDefinitionLocatorConfiguration {
 
+		/**
+		 * 	当classpath中存在DiscoveryClient起效
+		 *   通过spring.cloud.gateway.discovery.locator.enabled配置注册中心查找的开启与关闭
+		 *
+		 * @param discoveryClient
+		 * @param properties
+		 * @return
+		 */
 		@Bean
 		@ConditionalOnProperty(name = "spring.cloud.gateway.discovery.locator.enabled")
 		public DiscoveryClientRouteDefinitionLocator discoveryClientRouteDefinitionLocator(

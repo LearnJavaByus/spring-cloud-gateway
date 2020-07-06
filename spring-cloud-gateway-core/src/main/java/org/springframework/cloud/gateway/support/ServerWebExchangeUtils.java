@@ -252,6 +252,7 @@ public final class ServerWebExchangeUtils {
 	public static void addOriginalRequestUrl(ServerWebExchange exchange, URI url) {
 		exchange.getAttributes().computeIfAbsent(GATEWAY_ORIGINAL_REQUEST_URL_ATTR,
 				s -> new LinkedHashSet<>());
+		//因为可以使用 RewritePathGatewayFilterFactory / PrefixPathGatewayFilterFactory 多次重写。
 		LinkedHashSet<URI> uris = exchange
 				.getRequiredAttribute(GATEWAY_ORIGINAL_REQUEST_URL_ATTR);
 		uris.add(url);

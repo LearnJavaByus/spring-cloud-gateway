@@ -38,6 +38,9 @@ import org.springframework.data.redis.core.script.RedisScript;
 import org.springframework.scripting.support.ResourceScriptSource;
 import org.springframework.web.reactive.DispatcherHandler;
 
+/**
+ * 作用是初始化初始化 RedisRateLimiter 限流功能的
+ */
 @Configuration(proxyBeanMethods = false)
 @AutoConfigureAfter(RedisReactiveAutoConfiguration.class)
 @AutoConfigureBefore(GatewayAutoConfiguration.class)

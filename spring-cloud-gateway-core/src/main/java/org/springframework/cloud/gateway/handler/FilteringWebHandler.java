@@ -49,6 +49,9 @@ public class FilteringWebHandler implements WebHandler {
 
 	protected static final Log logger = LogFactory.getLog(FilteringWebHandler.class);
 
+	/**
+	 * 全局过滤器
+	 */
 	private final List<GatewayFilter> globalFilters;
 
 	public FilteringWebHandler(List<GlobalFilter> globalFilters) {
@@ -57,9 +60,11 @@ public class FilteringWebHandler implements WebHandler {
 
 	private static List<GatewayFilter> loadFilters(List<GlobalFilter> filters) {
 		return filters.stream().map(filter -> {
+			//在 FilteringWebHandler 初始化时，将 GlobalFilter 委托成 GatewayFilterAdapter
 			GatewayFilterAdapter gatewayFilter = new GatewayFilterAdapter(filter);
 			if (filter instanceof Ordered) {
 				int order = ((Ordered) filter).getOrder();
+				//委托一层 OrderedGatewayFilter排序
 				return new OrderedGatewayFilter(gatewayFilter, order);
 			}
 			return gatewayFilter;
@@ -73,21 +78,27 @@ public class FilteringWebHandler implements WebHandler {
 
 	@Override
 	public Mono<Void> handle(ServerWebExchange exchange) {
+		// 获得 Route
 		Route route = exchange.getRequiredAttribute(GATEWAY_ROUTE_ATTR);
+		// 获得 GatewayFilter
 		List<GatewayFilter> gatewayFilters = route.getFilters();
 
 		List<GatewayFilter> combined = new ArrayList<>(this.globalFilters);
 		combined.addAll(gatewayFilters);
-		// TODO: needed or cached?
+		// TODO: needed or cached? // 排序
 		AnnotationAwareOrderComparator.sort(combined);
 
 		if (logger.isDebugEnabled()) {
 			logger.debug("Sorted gatewayFilterFactories: " + combined);
 		}
 
+		// 创建 DefaultGatewayFilterChain
 		return new DefaultGatewayFilterChain(combined).filter(exchange);
 	}
 
+	/**
+	 *   网关过滤器链默认实现类
+	 */
 	private static class DefaultGatewayFilterChain implements GatewayFilterChain {
 
 		private final int index;
@@ -125,6 +136,11 @@ public class FilteringWebHandler implements WebHandler {
 
 	}
 
+	/**
+	 * 网关过滤器适配器
+	 *
+	 * 通过 GatewayFilterAdapter 将 GlobalFilter 适配成 GatewayFilter
+	 */
 	private static class GatewayFilterAdapter implements GatewayFilter {
 
 		private final GlobalFilter delegate;

@@ -37,6 +37,9 @@ import static org.springframework.cloud.gateway.support.ServerWebExchangeUtils.G
 
 /**
  * @author Spencer Gibb
+ *
+ * 查找匹配到 Route并进行处理
+ *
  */
 public class RoutePredicateHandlerMapping extends AbstractHandlerMapping {
 

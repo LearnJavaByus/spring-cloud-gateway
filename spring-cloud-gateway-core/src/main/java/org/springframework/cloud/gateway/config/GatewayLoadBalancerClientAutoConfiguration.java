@@ -32,8 +32,16 @@ import org.springframework.web.reactive.DispatcherHandler;
 /**
  * AutoConfiguration for {@link LoadBalancerClientFilter}.
  *
+ * 作用是初始化 LoadBalancerClientFilter 路由的负载均衡拦截器
+ *
  * @author Spencer Gibb
  * @author Olga Maciaszek-Sharma
+ *
+ * ConditionalOnClass 条件判断注解
+ * classpath中存在LoadBalancerClient和RibbonAutoConfiguration和DispatcherHandler时此配置起效
+ *
+ * AutoConfigureAfter 执行顺序注解
+ *
  */
 @Configuration(proxyBeanMethods = false)
 @ConditionalOnClass({ LoadBalancerClient.class, RibbonAutoConfiguration.class,
@@ -42,6 +50,16 @@ import org.springframework.web.reactive.DispatcherHandler;
 @EnableConfigurationProperties(LoadBalancerProperties.class)
 public class GatewayLoadBalancerClientAutoConfiguration {
 
+	/**
+	 * GlobalFilter beans
+	 * ConditionalOnBean  ConditionalOnMissingBean 条件判断注解
+	 *
+	 * DI容器中存在LoadBalancerClient类型Bean时起效
+	 *
+	 * @param client
+	 * @param properties
+	 * @return
+	 */
 	@Bean
 	@ConditionalOnBean(LoadBalancerClient.class)
 	@ConditionalOnMissingBean({ LoadBalancerClientFilter.class,
