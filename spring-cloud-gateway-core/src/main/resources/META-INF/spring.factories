@@ -14,3 +14,11 @@ org.springframework.cloud.gateway.config.GatewayReactiveLoadBalancerClientAutoCo
 
 org.springframework.boot.env.EnvironmentPostProcessor=\
 org.springframework.cloud.gateway.config.GatewayEnvironmentPostProcessor
+
+
+
+# GatewayClassPathWarningAutoConfiguration  依赖包的校验配置
+# GatewayAutoConfiguration 网关的核心配置
+# GatewayLoadBalancerClientAutoConfiguration 负载均衡相关依赖配置信息
+# GatewayRedisAutoConfiguration  流控的依赖配置信息
+#  注册中心相关的依赖配置GatewayDiscoveryClientAutoConfiguration

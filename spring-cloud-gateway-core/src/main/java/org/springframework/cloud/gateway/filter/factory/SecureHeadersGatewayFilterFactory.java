@@ -31,6 +31,9 @@ import static org.springframework.cloud.gateway.support.GatewayToStringStyler.fi
  * https://blog.appcanary.com/2017/http-security-headers.html.
  *
  * @author Spencer Gibb, Thirunavukkarasu Ravichandran
+ *
+ * 添加响应 Secure 相关的 Header
+ *
  */
 public class SecureHeadersGatewayFilterFactory extends AbstractGatewayFilterFactory {
 

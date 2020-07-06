@@ -31,14 +31,28 @@ import org.springframework.web.server.ServerWebExchange;
  */
 public interface AsyncPredicate<T> extends Function<T, Publisher<Boolean>> {
 
+	/**
+	 * 与操作，即两个 Predicate 组成一个，需要同时满足。
+	 * @param other
+	 * @return
+	 */
 	default AsyncPredicate<T> and(AsyncPredicate<? super T> other) {
 		return new AndAsyncPredicate<>(this, other);
 	}
 
+	/**
+	 * 取反操作，即对 Predicate 匹配结果取反。
+	 * @return
+	 */
 	default AsyncPredicate<T> negate() {
 		return new NegateAsyncPredicate<>(this);
 	}
 
+	/**
+	 * 或操作，即两个 Predicate 组成一个，只需满足其一。
+	 * @param other
+	 * @return
+	 */
 	default AsyncPredicate<T> or(AsyncPredicate<? super T> other) {
 		return new OrAsyncPredicate<>(this, other);
 	}

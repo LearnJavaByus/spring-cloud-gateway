@@ -41,7 +41,8 @@ import org.springframework.web.reactive.function.server.ServerResponse;
  */
 @SpringBootConfiguration
 @EnableAutoConfiguration
-@Import(AdditionalRoutes.class)
+//@Import({KeyResolverConfig.class, AdditionalRoutes.class})
+@Import({KeyResolverConfig.class})
 public class GatewaySampleApplication {
 
 	public static final String HELLO_FROM_FAKE_ACTUATOR_METRICS_GATEWAY_REQUESTS = "hello from fake /actuator/metrics/gateway.requests";
