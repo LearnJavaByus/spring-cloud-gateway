@@ -259,12 +259,16 @@ public class RedisRateLimiter extends AbstractRateLimiter<RedisRateLimiter.Confi
 		if (!this.initialized.get()) {
 			throw new IllegalStateException("RedisRateLimiter is not initialized");
 		}
-
+		// 只为 defaultFilters 配置 RequestRateLimiter 的时候
+		// config map 里边的 key 只有 "defaultFilters"
+		// 但是我们实际请求的 routeId 为 "customer_service"
 		Config routeConfig = loadConfiguration(routeId);
 
+		// 允许用户每秒做多少次请求
 		// How many requests per second do you want a user to be allowed to do?
 		int replenishRate = routeConfig.getReplenishRate();
 
+		// 令牌桶的容量，允许在一秒钟内完成的最大请求数
 		// How much bursting do you want to allow?
 		int burstCapacity = routeConfig.getBurstCapacity();
 
@@ -272,6 +276,7 @@ public class RedisRateLimiter extends AbstractRateLimiter<RedisRateLimiter.Confi
 		int requestedTokens = routeConfig.getRequestedTokens();
 
 		try {
+			// 限流key的名称（request_rate_limiter.{localhost}.timestamp，request_rate_limiter.{localhost}.tokens）
 			List<String> keys = getKeys(id);
 
 			// The arguments to the LUA script. time() returns unixtime in seconds.
@@ -279,6 +284,7 @@ public class RedisRateLimiter extends AbstractRateLimiter<RedisRateLimiter.Confi
 					burstCapacity + "", Instant.now().getEpochSecond() + "",
 					requestedTokens + "");
 			// allowed, tokens_left = redis.eval(SCRIPT, keys, args)
+			// 执行LUA脚本
 			Flux<List<Long>> flux = this.redisTemplate.execute(this.script, keys,
 					scriptArgs);
 			// .log("redisratelimiter", Level.FINER);

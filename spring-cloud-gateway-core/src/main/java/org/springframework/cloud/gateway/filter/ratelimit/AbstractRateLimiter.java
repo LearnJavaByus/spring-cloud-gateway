@@ -74,7 +74,8 @@ public abstract class AbstractRateLimiter<C> extends AbstractStatefulConfigurabl
 	@Override
 	public void onApplicationEvent(FilterArgsEvent event) {
 		Map<String, Object> args = event.getArgs();
-
+		// hasRelevantKey 检查 args 是否包含 configurationPropertyName
+		// 只有 defaultFilters 包含
 		if (args.isEmpty() || !hasRelevantKey(args)) {
 			return;
 		}

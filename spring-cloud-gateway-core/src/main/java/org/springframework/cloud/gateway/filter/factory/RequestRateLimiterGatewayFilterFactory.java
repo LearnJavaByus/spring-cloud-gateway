@@ -93,7 +93,9 @@ public class RequestRateLimiterGatewayFilterFactory extends
 	@SuppressWarnings("unchecked")
 	@Override
 	public GatewayFilter apply(Config config) {
+		//获取限流关键字配置bean
 		KeyResolver resolver = getOrDefault(config.keyResolver, defaultKeyResolver);
+		//这个就是限流的具体实现，默认使用RedisRateLimiter
 		RateLimiter<Object> limiter = getOrDefault(config.rateLimiter,
 				defaultRateLimiter);
 		boolean denyEmpty = getOrDefault(config.denyEmptyKey, this.denyEmptyKey);
@@ -115,6 +117,7 @@ public class RequestRateLimiterGatewayFilterFactory extends
 								.getAttribute(ServerWebExchangeUtils.GATEWAY_ROUTE_ATTR);
 						routeId = route.getId();
 					}
+					//这里的isAllowed就是具体实现，输入参数为路由id和限流key（这里为主机地址hostAddress）
 					return limiter.isAllowed(routeId, key).flatMap(response -> {
 
 						for (Map.Entry<String, String> header : response.getHeaders()
@@ -122,11 +125,11 @@ public class RequestRateLimiterGatewayFilterFactory extends
 							exchange.getResponse().getHeaders().add(header.getKey(),
 									header.getValue());
 						}
-
+						//如果为真，通过拦截
 						if (response.isAllowed()) {
 							return chain.filter(exchange);
 						}
-
+						//否则设置http码为429，too many request
 						setResponseStatus(exchange, config.getStatusCode());
 						return exchange.getResponse().setComplete();
 					});
