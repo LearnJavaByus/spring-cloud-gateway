@@ -62,6 +62,8 @@ import static org.springframework.cloud.gateway.support.ServerWebExchangeUtils.r
  * @author Spencer Gibb
  * @author Michele Mancioppi
  * @author Olga Maciaszek-Sharma
+ *
+ * 可以创建 HystrixGatewayFilter ( 实际是内部匿名类，为了表述方便，下面继续这么称呼 ) 。
  */
 public class HystrixGatewayFilterFactory
 		extends AbstractGatewayFilterFactory<HystrixGatewayFilterFactory.Config> {
@@ -138,8 +140,10 @@ public class HystrixGatewayFilterFactory
 							exchange, chain, context);
 
 					return Mono.create(s -> {
+						// 使用 Hystrix Command Observable 订阅
 						Subscription sub = command.toObservable().subscribe(s::success,
 								s::error, s::success);
+						// Mono 取消时，取消 Hystrix Command Observable 的订阅，结束 Hystrix Command 的执行
 						s.onCancel(sub::unsubscribe);
 					}).onErrorResume((Function<Throwable, Mono<Void>>) throwable -> {
 						if (throwable instanceof HystrixRuntimeException) {

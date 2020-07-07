@@ -179,6 +179,11 @@ public final class ServerWebExchangeUtils {
 		exchange.getAttributes().remove(GATEWAY_ALREADY_ROUTED_ATTR);
 	}
 
+	/**
+	 * 判断该请求暂未被其他 Routing 网关处理
+	 * @param exchange
+	 * @return
+	 */
 	public static boolean isAlreadyRouted(ServerWebExchange exchange) {
 		return exchange.getAttributeOrDefault(GATEWAY_ALREADY_ROUTED_ATTR, false);
 	}

@@ -68,11 +68,14 @@ import static org.springframework.cloud.gateway.support.ServerWebExchangeUtils.s
 /**
  * @author Spencer Gibb
  * @author Biju Kunjummen
+ *
+ * ，Netty 路由网关过滤器。其根据 http:// 或 https:// 前缀( Scheme )过滤处理，
+ * 使用基于 Netty 实现的 HttpClient 请求后端 Http 服务。
  */
 public class NettyRoutingFilter implements GlobalFilter, Ordered {
 
 	private static final Log log = LogFactory.getLog(NettyRoutingFilter.class);
-
+	//基于 Netty 实现的 HttpClient 。通过该属性，请求后端的 Http 服务。
 	private final HttpClient httpClient;
 
 	private final ObjectProvider<List<HttpHeadersFilter>> headersFiltersProvider;
@@ -105,18 +108,21 @@ public class NettyRoutingFilter implements GlobalFilter, Ordered {
 	@Override
 	@SuppressWarnings("Duplicates")
 	public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
+		// 获得 requestUrl
 		URI requestUrl = exchange.getRequiredAttribute(GATEWAY_REQUEST_URL_ATTR);
-
+		// 判断是否能够处理
 		String scheme = requestUrl.getScheme();
 		if (isAlreadyRouted(exchange)
 				|| (!"http".equals(scheme) && !"https".equals(scheme))) {
 			return chain.filter(exchange);
 		}
+		// 设置已经路由
 		setAlreadyRouted(exchange);
 
 		ServerHttpRequest request = exchange.getRequest();
 
 		final HttpMethod method = HttpMethod.valueOf(request.getMethodValue());
+		// 获得 url
 		final String url = requestUrl.toASCIIString();
 
 		HttpHeaders filtered = filterRequest(getHeadersFilters(), exchange);
@@ -137,7 +143,7 @@ public class NettyRoutingFilter implements GlobalFilter, Ordered {
 						String host = request.getHeaders().getFirst(HttpHeaders.HOST);
 						headers.add(HttpHeaders.HOST, host);
 					}
-				}).request(method).uri(url).send((req, nettyOutbound) -> {
+				}).request(method).uri(url).send((req, nettyOutbound) -> { // 请求
 					if (log.isTraceEnabled()) {
 						nettyOutbound
 								.withConnection(connection -> log.trace("outbound route: "
@@ -150,6 +156,7 @@ public class NettyRoutingFilter implements GlobalFilter, Ordered {
 					// Defer committing the response until all route filters have run
 					// Put client response as ServerWebExchange attribute and write
 					// response later NettyWriteResponseFilter
+					// 设置 Response 到 CLIENT_RESPONSE_ATTR
 					exchange.getAttributes().put(CLIENT_RESPONSE_ATTR, res);
 					exchange.getAttributes().put(CLIENT_RESPONSE_CONN_ATTR, connection);
 

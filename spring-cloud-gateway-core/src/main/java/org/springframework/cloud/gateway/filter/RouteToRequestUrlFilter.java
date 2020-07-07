@@ -35,6 +35,8 @@ import static org.springframework.cloud.gateway.support.ServerWebExchangeUtils.c
 
 /**
  * @author Spencer Gibb
+ *
+ * 根据匹配的 Route ，计算请求的地址。
  */
 public class RouteToRequestUrlFilter implements GlobalFilter, Ordered {
 
@@ -61,6 +63,7 @@ public class RouteToRequestUrlFilter implements GlobalFilter, Ordered {
 
 	@Override
 	public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
+		// 获得 Route
 		Route route = exchange.getAttribute(GATEWAY_ROUTE_ATTR);
 		if (route == null) {
 			return chain.filter(exchange);
@@ -85,12 +88,14 @@ public class RouteToRequestUrlFilter implements GlobalFilter, Ordered {
 			// underscore)
 			throw new IllegalStateException("Invalid host: " + routeUri.toString());
 		}
-
+   	    // 拼接 mergedUrl
 		URI mergedUrl = UriComponentsBuilder.fromUri(uri)
 				// .uri(routeUri)
 				.scheme(routeUri.getScheme()).host(routeUri.getHost())
 				.port(routeUri.getPort()).build(encoded).toUri();
+		// 设置 requestUrl 到 GATEWAY_REQUEST_URL_ATTR {@link RewritePathGatewayFilterFactory}
 		exchange.getAttributes().put(GATEWAY_REQUEST_URL_ATTR, mergedUrl);
+		// 提交过滤器链继续过滤
 		return chain.filter(exchange);
 	}
 

@@ -51,6 +51,8 @@ import org.springframework.validation.annotation.Validated;
  * @author Spencer Gibb
  * @author Ronny Bräunlich
  * @author Denis Cutic
+ *
+ * 基于 Redis 的分布式限流器实现类。
  */
 @ConfigurationProperties("spring.cloud.gateway.redis-rate-limiter")
 public class RedisRateLimiter extends AbstractRateLimiter<RedisRateLimiter.Config>

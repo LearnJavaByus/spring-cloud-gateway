@@ -22,6 +22,8 @@ import org.springframework.web.server.ServerWebExchange;
 
 /**
  * @author Spencer Gibb
+ *
+ * 请求键解析器接口,通过实现 KeyResolver 接口，实现获得不同的请求的限流键，例如URL / 用户 / IP 等。
  */
 public interface KeyResolver {
 

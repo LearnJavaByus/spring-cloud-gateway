@@ -26,15 +26,17 @@ import org.springframework.util.Assert;
 
 /**
  * @author Spencer Gibb
+ *
+ * 限流器接口
  */
 public interface RateLimiter<C> extends StatefulConfigurable<C> {
-
+	//判断是否被限流。
 	Mono<Response> isAllowed(String routeId, String id);
 
 	class Response {
-
+		//是否允许访问( 未被限流 )
 		private final boolean allowed;
-
+		//令牌桶剩余数量
 		private final long tokensRemaining;
 
 		private final Map<String, String> headers;

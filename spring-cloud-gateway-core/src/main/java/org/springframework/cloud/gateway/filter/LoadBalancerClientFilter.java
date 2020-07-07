@@ -38,6 +38,8 @@ import static org.springframework.cloud.gateway.support.ServerWebExchangeUtils.a
  * @deprecated in favour of {@link ReactiveLoadBalancerClientFilter}
  * @author Spencer Gibb
  * @author Tim Ysewyn
+ *
+ * 根据 lb:// 前缀过滤处理，使用 serviceId 选择一个服务实例，从而实现负载均衡。
  */
 @Deprecated
 public class LoadBalancerClientFilter implements GlobalFilter, Ordered {
