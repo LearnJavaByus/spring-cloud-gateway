@@ -44,12 +44,12 @@ public class RedirectToGatewayFilterFactory
 		extends AbstractGatewayFilterFactory<RedirectToGatewayFilterFactory.Config> {
 
 	/**
-	 * Status key.
+	 * Status key. 状态键.
 	 */
 	public static final String STATUS_KEY = "status";
 
 	/**
-	 * URL key.
+	 * URL key. 重定向地址键.
 	 */
 	public static final String URL_KEY = "url";
 

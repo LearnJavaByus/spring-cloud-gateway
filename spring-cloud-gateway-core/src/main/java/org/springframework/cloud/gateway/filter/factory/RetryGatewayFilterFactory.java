@@ -51,11 +51,14 @@ import static org.springframework.cloud.gateway.support.GatewayToStringStyler.fi
 import static org.springframework.cloud.gateway.support.ServerWebExchangeUtils.CLIENT_RESPONSE_HEADER_NAMES;
 import static org.springframework.cloud.gateway.support.ServerWebExchangeUtils.removeAlreadyRouted;
 
+/**
+ * 重试机制工厂
+ */
 public class RetryGatewayFilterFactory
 		extends AbstractGatewayFilterFactory<RetryGatewayFilterFactory.RetryConfig> {
 
 	/**
-	 * Retry iteration key.
+	 * Retry iteration key. 重试次数 key.
 	 */
 	public static final String RETRY_ITERATION_KEY = "retry_iteration";
 
@@ -71,18 +74,22 @@ public class RetryGatewayFilterFactory
 
 	@Override
 	public GatewayFilter apply(RetryConfig retryConfig) {
+		// 验证 RetryConfig
 		retryConfig.validate();
 
 		Repeat<ServerWebExchange> statusCodeRepeat = null;
 		if (!retryConfig.getStatuses().isEmpty() || !retryConfig.getSeries().isEmpty()) {
+			// 创建断言
 			Predicate<RepeatContext<ServerWebExchange>> repeatPredicate = context -> {
+				// 获取请求上下文
 				ServerWebExchange exchange = context.applicationContext();
+				// 是否超过最大重试次数
 				if (exceedsMaxIterations(exchange, retryConfig)) {
 					return false;
 				}
-
+				// 获取响应状态码
 				HttpStatus statusCode = exchange.getResponse().getStatusCode();
-
+				// 配置中是否包含该响应状态码
 				boolean retryableStatusCode = retryConfig.getStatuses()
 						.contains(statusCode);
 
@@ -99,6 +106,7 @@ public class RetryGatewayFilterFactory
 						() -> finalRetryableStatusCode, () -> statusCode,
 						retryConfig::getStatuses, retryConfig::getSeries);
 
+				// 获取请求方法
 				HttpMethod httpMethod = exchange.getRequest().getMethod();
 				boolean retryableMethod = retryConfig.getMethods().contains(httpMethod);
 
@@ -281,8 +289,10 @@ public class RetryGatewayFilterFactory
 	@SuppressWarnings("unchecked")
 	public static class RetryConfig implements HasRouteId {
 
+		//路由 ID
 		private String routeId;
 
+		//重试次数，默认为 3次
 		private int retries = 3;
 
 		private List<Series> series = toList(Series.SERVER_ERROR);

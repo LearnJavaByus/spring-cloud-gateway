@@ -68,6 +68,7 @@ import static org.springframework.cloud.gateway.support.ServerWebExchangeUtils.r
 public class HystrixGatewayFilterFactory
 		extends AbstractGatewayFilterFactory<HystrixGatewayFilterFactory.Config> {
 
+	//提供者
 	private final ObjectProvider<DispatcherHandler> dispatcherHandlerProvider;
 
 	// do not use this dispatcherHandler directly, use getDispatcherHandler() instead.
@@ -81,6 +82,7 @@ public class HystrixGatewayFilterFactory
 
 	private DispatcherHandler getDispatcherHandler() {
 		if (dispatcherHandler == null) {
+			// 获取可用的 DispatcherHandler 处理器
 			dispatcherHandler = dispatcherHandlerProvider.getIfAvailable();
 		}
 
@@ -123,6 +125,7 @@ public class HystrixGatewayFilterFactory
 		if (config.setter == null) {
 			Assert.notNull(config.name,
 					"A name must be supplied for the Hystrix Command Key");
+			// 创建 RouteHystrixCommand 对象
 			HystrixCommandGroupKey groupKey = HystrixCommandGroupKey.Factory
 					.asKey(getClass().getSimpleName());
 			HystrixCommandKey commandKey = HystrixCommandKey.Factory.asKey(config.name);
